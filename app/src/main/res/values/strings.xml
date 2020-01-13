@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">MY PASS</string>
+    <string name="hint_find_passwords">Find Passwords</string>
+    <string name="title_activity_login">Login</string>
+    <string name="SAVE">SAVE</string>
+    <string name="login">Login</string>
+    <string name="login_title">My Pass</string>
+    <string name="add_password">Add Password</string>
+    <string name="dashboard_sub_title">Manage Passwords</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="menu_export">Export</string>
+    <string name="menu_import">Import</string>
+    <string name="menu_deleteAll">Delete All</string>
+    <string name="menu_about">About</string>
+</resources>

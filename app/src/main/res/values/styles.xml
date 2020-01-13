@@ -1,0 +1,19 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/primaryRed</item>
+    </style>
+
+    <style name="dashboardTitleText">
+        <item name="android:fontFamily">@font/metropolis_light</item>
+        <item name="android:textSize">24dp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="dashboardSubTitleText">
+        <item name="android:fontFamily">@font/metropolis_light</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>
