@@ -84,7 +84,7 @@ public class PasswordRepositoryTest {
         classUnderTest.save(FakePassword1);
         classUnderTest.save(FakePassword2);
 
-        final List<Password> result = classUnderTest.search(FakePassword1.getTitle());
+        final List<Password> result = classUnderTest.searchByTitle(FakePassword1.getTitle());
         assertThat(result, iterableWithSize(1));
         assertThat(result.get(0), is(FakePassword1));
     }
@@ -108,5 +108,28 @@ public class PasswordRepositoryTest {
         assertThat(allAfterDelete, iterableWithSize(1));
         assertThat(allAfterDelete.get(0), is(FakePassword2));
 
+    }
+
+    @Test
+    public void updatePassword() {
+        final PasswordRepository repository = createClassUnderTest();
+        assertThat(repository.findAll(), emptyCollectionOf(Password.class));
+
+        repository.save(FakePassword1);
+        final List<Password> passwords = repository.searchByTitle(FakePassword1.getTitle());
+        assertThat(passwords.size(), is(1));
+        assertThat(passwords.get(0), is(FakePassword1));
+
+        Password updatedPassword = new Password(FakePassword1.getId(), FakePassword1.getTitle(),
+                FakePassword1.getUsername(), FakePassword1.getPassword(),
+                FakePassword1.getNotes(), FakePassword1.getWebsite(),
+                FakePassword1.getCreateAt(), FakePassword1.isActive());
+        final String newPasswordString = "ABCDEFG";
+        updatedPassword.setPassword(newPasswordString);
+
+        assertThat(repository.update(updatedPassword), is(1));
+        final List<Password> allPasswords = repository.findAll();
+        assertThat(allPasswords.size(), is(1));
+        assertThat(allPasswords.get(0), is(updatedPassword));
     }
 }

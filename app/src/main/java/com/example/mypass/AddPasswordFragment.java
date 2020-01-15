@@ -18,6 +18,7 @@ import com.example.mypass.util.DefaultPasswordGenerator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class AddPasswordFragment extends DialogFragment {
     private EditText mEditTextTitle;
@@ -26,10 +27,11 @@ public class AddPasswordFragment extends DialogFragment {
     private EditText mEditTextWebsite;
     private EditText mEditTextUsername;
 
+    private Optional<Password> maybePassword;
     private PasswordSaveEventHandler passwordSaveEventHandler;
 
     private final DefaultPasswordGenerator passwordGenerator;
-    private Map<Integer,Integer> formInputFields;
+    private Map<Integer, Integer> formInputFields;
 
     {
         formInputFields = new HashMap<>();
@@ -40,10 +42,12 @@ public class AddPasswordFragment extends DialogFragment {
         formInputFields.put(R.id.form_txt_notes, R.id.btn_clear_txt_notes);
     }
 
-    AddPasswordFragment(PasswordSaveEventHandler passwordSaveEventHandler,
-                        DefaultPasswordGenerator passwordGenerator) {
+    public AddPasswordFragment(PasswordSaveEventHandler passwordSaveEventHandler,
+                               DefaultPasswordGenerator passwordGenerator,
+                               Optional<Password> maybePassword) {
         this.passwordSaveEventHandler = passwordSaveEventHandler;
         this.passwordGenerator = passwordGenerator;
+        this.maybePassword = maybePassword;
     }
 
     @Nullable
@@ -51,6 +55,7 @@ public class AddPasswordFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View mRootView = inflater.inflate(R.layout.fragment_add_password, container, false);
         initializeComponents(mRootView);
+        maybePassword.ifPresent(this::showCurrentPassword);
         return mRootView;
     }
 
@@ -85,9 +90,27 @@ public class AddPasswordFragment extends DialogFragment {
             String password = Objects.requireNonNull(mEditTextPassword.getText()).toString();
             String website = Objects.requireNonNull(mEditTextWebsite.getText().toString());
             String username = Objects.requireNonNull(mEditTextUsername.getText().toString());
-            passwordSaveEventHandler.onSave(new Password(passwordTitle, username, website, passwordNotes, password));
+            if (maybePassword.isPresent()) {
+                Password pass = maybePassword.get();
+                pass.setTitle(passwordTitle);
+                pass.setPassword(password);
+                pass.setUsername(username);
+                pass.setNotes(passwordNotes);
+                pass.setWebsite(website);
+                passwordSaveEventHandler.onSave(pass);
+            } else {
+                passwordSaveEventHandler.onSave(new Password(passwordTitle, username, website, passwordNotes, password));
+            }
             dismiss();
         });
+    }
+
+    private void showCurrentPassword(Password password) {
+        mEditTextTitle.setText(password.getTitle());
+        mEditTextNotes.setText(password.getNotes());
+        mEditTextPassword.setText(password.getPassword());
+        mEditTextWebsite.setText(password.getWebsite());
+        mEditTextUsername.setText(password.getUsername());
     }
 
 }

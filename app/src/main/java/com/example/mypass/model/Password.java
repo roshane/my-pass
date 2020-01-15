@@ -89,6 +89,18 @@ public class Password {
         isActive = active;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj == null) {

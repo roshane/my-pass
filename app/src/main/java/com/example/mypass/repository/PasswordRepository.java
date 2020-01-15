@@ -39,8 +39,8 @@ public class PasswordRepository {
         }
     }
 
-    public List<Password> search(String key) {
-        String formattedKey = MessageFormat.format(" LIKE \"%{0}%\" ", key);
+    public List<Password> searchByTitle(String title) {
+        String formattedKey = MessageFormat.format(" LIKE \"%{0}%\" ", title);
         try (
                 final SQLiteDatabase database = passwordDbHelper.getWritableDatabase();
                 Cursor cursor = database.query(PasswordEntry.TABLE_NAME, null,
@@ -93,6 +93,26 @@ public class PasswordRepository {
             database.execSQL(String.format("DELETE FROM %s", PasswordEntry.TABLE_NAME));
         } catch (Exception ex) {
             Log.e(LOG_TAG, "Error deleting all passwords", ex);
+            throw ex;
+        }
+    }
+
+    public long update(Password password) {
+        try (
+                final SQLiteDatabase database = passwordDbHelper.getWritableDatabase()
+        ) {
+            ContentValues values = new ContentValues();
+            values.put(PasswordEntry.COLUMN_CREATED_AT, password.getCreateAt().toString());
+            values.put(PasswordEntry.COLUMN_NOTES, password.getNotes());
+            values.put(PasswordEntry.COLUMN_IS_ACTIVE, password.isActive() ? 1 : 0);
+            values.put(PasswordEntry.COLUMN_TITLE, password.getTitle());
+            values.put(PasswordEntry.COLUMN_PASSWORD, password.getPassword());
+            values.put(PasswordEntry.COLUMN_USERNAME, password.getUsername());
+            values.put(PasswordEntry.COLUMN_WEBSITE, password.getWebsite());
+            String whereClauseWithArgs = PasswordEntry._ID + "=" + password.getId();
+            return database.update(PasswordEntry.TABLE_NAME, values, whereClauseWithArgs, null);
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, "Error inserting password", ex);
             throw ex;
         }
     }

@@ -1,5 +1,6 @@
 package com.example.mypass;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -24,6 +25,7 @@ import com.example.mypass.repository.PasswordRepository;
 import com.example.mypass.util.DefaultPasswordGenerator;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static android.view.KeyEvent.KEYCODE_ENTER;
@@ -57,6 +59,12 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         initializeComponents();
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        clearSearchResult();
+        Log.d(LOG_TAG, "Clearing previous results");
     }
 
     private void initializeComponents() {
@@ -113,7 +121,7 @@ public class DashboardActivity extends AppCompatActivity {
         int searchCount;
         final String searchKey = mTextSearchKey.getText().toString().trim();
         if (!searchKey.isEmpty()) {
-            Password[] passwords = passwordRepository.search(searchKey).toArray(new Password[0]);
+            Password[] passwords = passwordRepository.searchByTitle(searchKey).toArray(new Password[0]);
             searchCount = passwords.length;
             showPasswords(passwords);
         } else {
@@ -127,7 +135,9 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void showPasswords(Password[] passwords) {
-        PasswordListAdapter passwordListAdapter = new PasswordListAdapter(getApplicationContext(), passwords);
+        PasswordListAdapter passwordListAdapter = new PasswordListAdapter(getApplicationContext(),
+                passwords,
+                getSupportFragmentManager());
         mListView.setAdapter(passwordListAdapter);
     }
 
@@ -153,7 +163,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void showDialogFullscreen(View ignore) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator);
+        AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator, Optional.empty());
         fragmentTransaction.add(android.R.id.content, newFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
