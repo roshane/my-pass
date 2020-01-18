@@ -1,6 +1,7 @@
 package com.example.mypass;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -22,9 +23,15 @@ import com.example.mypass.adapter.PasswordListAdapter;
 import com.example.mypass.dependencies.MyPassApplication;
 import com.example.mypass.model.Password;
 import com.example.mypass.repository.PasswordRepository;
+import com.example.mypass.util.CsvExporter;
+import com.example.mypass.util.CsvImporter;
 import com.example.mypass.util.DefaultPasswordGenerator;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,6 +39,12 @@ import static android.view.KeyEvent.KEYCODE_ENTER;
 import static java.lang.String.format;
 
 public class DashboardActivity extends AppCompatActivity {
+    private static final int PICK_EXPORT_DIRECTOR_REQUEST_CODE = 2;
+    private static final int PICK_BACKUP_FILE_REQUEST_CODE = 3;
+    private static final int CSV_EXPORT_REQUEST_CODE = 4;
+    private static final int CSV_IMPORT_REQUEST_CODE = 5;
+    private static final String INTENT_EXTRA_FILE_PATH = "intent.Extra.FilePath";
+    private static final String BUSY_INDICATOR_TAG = "busyIndicatorTag";
     private ListView mListView;
     private ImageButton mBtnAddPassword;
     private ImageButton mBtnSearchPasswords;
@@ -43,6 +56,9 @@ public class DashboardActivity extends AppCompatActivity {
 
     private PasswordRepository passwordRepository = null;
     private DefaultPasswordGenerator passwordGenerator = null;
+    private CsvExporter csvExporter = null;
+    private CsvImporter csvImporter = null;
+
     private DialogBusyIndicator busyIndicator;
 
     private final AtomicReference<PopupMenu> popupMenuAtomicReference = new AtomicReference<>();
@@ -52,6 +68,8 @@ public class DashboardActivity extends AppCompatActivity {
         super.onPostCreate(savedInstanceState);
         this.passwordRepository = ((MyPassApplication) getApplication()).getPasswordRepository();
         this.passwordGenerator = ((MyPassApplication) getApplication()).getPasswordGenerator();
+        this.csvExporter = ((MyPassApplication) getApplication()).getCsvExporter();
+        this.csvImporter = ((MyPassApplication) getApplication()).getCsvImporter();
     }
 
     @Override
@@ -76,7 +94,7 @@ public class DashboardActivity extends AppCompatActivity {
         mBtnShowPopupMenu = findViewById(R.id.btn_show_popup_menu);
         mProgressBar = findViewById(R.id.progressbar);
 
-        mBtnAddPassword.setOnClickListener(this::showDialogFullscreen);
+        mBtnAddPassword.setOnClickListener(this::showAddPasswordDialog);
         mBtnSearchPasswords.setOnClickListener(this::searchSavedPasswords);
         mTextSearchKey.setOnKeyListener(this::searchOnEnterKeyDown);
         mBtnShowPopupMenu.setOnClickListener(this::showPopupMenu);
@@ -86,21 +104,22 @@ public class DashboardActivity extends AppCompatActivity {
         if (popupMenuAtomicReference.get() == null) {
             PopupMenu popupMenu = new PopupMenu(this, view);
             popupMenu.getMenuInflater().inflate(R.menu.dashboard_popup_menu, popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(this::handleMenuItemCliek);
+            popupMenu.setOnMenuItemClickListener(this::handleMenuItemClick);
             popupMenuAtomicReference.set(popupMenu);
         }
         popupMenuAtomicReference.get().show();
     }
 
-    private boolean handleMenuItemCliek(MenuItem menuItem) {
+    private boolean handleMenuItemClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.menu_export_passwords:
-                Log.d(LOG_TAG, "Menu item clicked " + menuItem.getTitle());
-                busyIndicator.show(getSupportFragmentManager(), "busyindicator");
+                pickBackupFileDirectory();
                 break;
             case R.id.menu_import_passwords:
+                pickBackFile();
                 break;
             case R.id.menu_delete_all_passwords:
+                deleteAllPasswords();
                 break;
             default:
                 Log.d(LOG_TAG, "Invalid menu item click");
@@ -108,6 +127,75 @@ public class DashboardActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        clearSearchResult();
+    }
+
+    private void deleteAllPasswords() {
+        clearSearchResult();
+        passwordRepository.deleteAll();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        switch (requestCode) {
+            case PICK_EXPORT_DIRECTOR_REQUEST_CODE:
+                if (resultCode == RESULT_OK && Objects.nonNull(data)) {
+                    Uri directoryLocation = data.getData();
+                    createBackupCsvFile(Objects.requireNonNull(directoryLocation));
+                }
+                break;
+
+            case CSV_EXPORT_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+//                   TODO  busyIndicator.showNow(getSupportFragmentManager(), BUSY_INDICATOR_TAG);
+                    final List<Password> allPasswords = this.passwordRepository.findAll();
+                    try {
+                        csvExporter.exportToCsv(allPasswords, data.getData(), getContentResolver());
+                        Toast.makeText(getApplicationContext(), "Backup file created.", Toast.LENGTH_LONG).show();
+                    } catch (IOException ex) {
+                        Log.e(LOG_TAG, "Error exporting passwords to file", ex);
+                    }
+//                    busyIndicator.dismissAllowingStateLoss();
+                } else {
+                    Log.d(LOG_TAG, "Error getting export directory location");
+                }
+                break;
+
+            case PICK_BACKUP_FILE_REQUEST_CODE:
+                if (resultCode == RESULT_OK && Objects.nonNull(data)) {
+                    try {
+                        final List<Password> passwords = csvImporter.importFromCsv(data.getData(), getContentResolver());
+                        passwords.forEach(passwordRepository::save);
+                        Toast.makeText(getApplicationContext(), "Imported " + passwords.size() + " passwords", Toast.LENGTH_LONG)
+                                .show();
+                    } catch (IOException ex) {
+                        Log.e(LOG_TAG, "Error importing password", ex);
+                    }
+                }
+                break;
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
+
+    }
+
+    private void pickBackupFileDirectory() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        startActivityForResult(intent, PICK_EXPORT_DIRECTOR_REQUEST_CODE);
+    }
+
+    private void pickBackFile() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, PICK_BACKUP_FILE_REQUEST_CODE);
+    }
 
     private boolean searchOnEnterKeyDown(View view, int keyCode, KeyEvent keyEvent) {
         if (keyCode == KEYCODE_ENTER) {
@@ -160,7 +248,7 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
-    private void showDialogFullscreen(View ignore) {
+    private void showAddPasswordDialog(View view) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator, Optional.empty());
@@ -169,4 +257,15 @@ public class DashboardActivity extends AppCompatActivity {
                 .commit();
         clearSearchResult();
     }
+
+    private void createBackupCsvFile(Uri pickerInitialUri) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/csv");
+        intent.putExtra(Intent.EXTRA_TITLE, Constants.getFileName());
+        intent.putExtra(INTENT_EXTRA_FILE_PATH, Paths.get(pickerInitialUri.toString(), Constants.getFileName()).toString());
+        startActivityForResult(intent, CSV_EXPORT_REQUEST_CODE);
+    }
+
+
 }

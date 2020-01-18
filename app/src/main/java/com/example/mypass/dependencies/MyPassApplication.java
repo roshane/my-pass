@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.example.mypass.repository.PasswordRepository;
 import com.example.mypass.util.CsvExporter;
+import com.example.mypass.util.CsvImporter;
 import com.example.mypass.util.DefaultPasswordGenerator;
 
 public class MyPassApplication extends Application {
@@ -29,5 +30,9 @@ public class MyPassApplication extends Application {
 
     public CsvExporter getCsvExporter() {
         return this.appContainer.getCsvExporter();
+    }
+
+    public CsvImporter getCsvImporter() {
+        return this.appContainer.getCsvImporter();
     }
 }

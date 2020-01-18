@@ -1,5 +1,11 @@
 package com.example.mypass.util;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.net.Uri;
+
+import androidx.test.core.app.ApplicationProvider;
+
 import com.example.mypass.Fakes;
 import com.example.mypass.model.Password;
 
@@ -8,6 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -20,13 +27,21 @@ public class CsvExporterTest extends Fakes {
 
     @Test
     public void testExportToCsv() throws Exception {
-        Password[] passwords = new Password[]{FakePassword1, FakePassword2};
-        final File csvFile = createClassUnderTest.exportToCsv(passwords);
-        final List<String> fileContent = Files.readAllLines(Paths.get(csvFile.getAbsolutePath()));
+        Context context = ApplicationProvider.getApplicationContext();
+        ContentResolver contentResolver = context.getContentResolver();
+
+        List<Password> passwords = Arrays.asList(FakePassword1, FakePassword2);
+        File filePath = context.getCacheDir();
+        final File testCsvFile = new File(filePath.getPath(), "test.csv");
+        createClassUnderTest.exportToCsv(passwords, Uri.fromFile(testCsvFile), contentResolver);
+        if (!Files.exists(Paths.get(testCsvFile.getPath()))) {
+            throw new Exception("File doesn't exists");
+        }
+        final List<String> fileContent = Files.readAllLines(Paths.get(testCsvFile.getPath()));
         assertThat(fileContent, notNullValue());
-        assertThat(fileContent.size(), is(passwords.length));
-        assertThat(fileContent.get(0), is(mapToCsvRow(passwords[0])));
-        assertThat(fileContent.get(1), is(mapToCsvRow(passwords[1])));
+        assertThat(fileContent.size(), is(passwords.size()));
+        assertThat(fileContent.get(0), is(mapToCsvRow(passwords.get(0))));
+        assertThat(fileContent.get(1), is(mapToCsvRow(passwords.get(1))));
         System.out.println(fileContent);
     }
 

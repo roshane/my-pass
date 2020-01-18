@@ -1,25 +1,27 @@
 package com.example.mypass.util;
 
+import android.content.ContentResolver;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.example.mypass.model.Password;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CsvImporter {
 
     private static final String LOG_TAG = CsvImporter.class.getSimpleName();
-    private String DELIMITER = ",";
-    private int TOKEN_COUNT = 7;
 
-    public Password[] importFromCsv(Path filePath) throws IOException {
-        try (FileReader fileReader = new FileReader(new File(filePath.toUri()));
+    public List<Password> importFromCsv(Uri fileUri, ContentResolver contentResolver) throws IOException {
+        try (ParcelFileDescriptor pfd = contentResolver.openFileDescriptor(fileUri, "r");
+             FileReader fileReader = new FileReader(pfd.getFileDescriptor());
              BufferedReader bufferedReader = new BufferedReader(fileReader)) {
             return bufferedReader.lines().map(line -> {
                 try {
@@ -28,15 +30,18 @@ public class CsvImporter {
                     Log.e(LOG_TAG, "Error importing line", ex);
                 }
                 return null;
-            }).filter(Objects::nonNull).toArray(Password[]::new);
+            }).filter(Objects::nonNull).collect(Collectors.toList());
         } catch (Exception ex) {
-            Log.e(LOG_TAG, "Error reading file " + filePath, ex);
+            Log.e(LOG_TAG, "Error reading file " + fileUri.toString(), ex);
             throw ex;
         }
     }
 
     private Password mapToPassword(String line) throws Exception {
+        String DELIMITER = ",";
+        int TOKEN_COUNT = 7;
         final String[] tokens = line.split(DELIMITER);
+
         if (tokens.length != TOKEN_COUNT) {
             throw new Exception("Parser Exception at line " + line);
         }

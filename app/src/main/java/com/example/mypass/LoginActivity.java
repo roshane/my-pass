@@ -1,18 +1,23 @@
 package com.example.mypass;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricPrompt;
 
 import java.util.concurrent.Executor;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private final int PERMISSION_RQC_WRITE_EXTERNAL = 0x01;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +71,22 @@ public class LoginActivity extends AppCompatActivity {
                         .show();
             }
         });
-
-        // Displays the "log in" prompt.
         biometricPrompt.authenticate(promptInfo);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_RQC_WRITE_EXTERNAL
+                && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            finish();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_RQC_WRITE_EXTERNAL);
+        }
     }
 }
