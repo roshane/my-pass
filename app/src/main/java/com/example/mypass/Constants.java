@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Constants {
     private static final String FILE_NAME_PREFIX = "mypass_backup";
-    private static final String FILE_NAME_SUFFIX = ".csv.txt";
+    private static final String FILE_NAME_SUFFIX = ".csv";
     private static final DateTimeFormatter dtFmt = DateTimeFormatter.ofPattern("YYYYMMDD");
 
     public static String getFileName() {
