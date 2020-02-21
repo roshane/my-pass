@@ -82,7 +82,7 @@ public class PasswordListAdapter extends ArrayAdapter<Password> implements DateF
 
         title.setText(passwords[position].getTitle());
         username.setText(passwords[position].getUsername());
-        String formattedDate = String.format("Created at: %s", DF.format(passwords[position].getCreateAt()));
+        String formattedDate = String.format("Created at: %s", DFHumanReadable.format(passwords[position].getCreateAt()));
         createDate.setText(formattedDate);
         return cardView;
     }
