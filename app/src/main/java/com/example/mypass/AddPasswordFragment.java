@@ -1,6 +1,8 @@
 package com.example.mypass;
 
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,12 +28,15 @@ public class AddPasswordFragment extends DialogFragment {
     private EditText mEditTextPassword;
     private EditText mEditTextWebsite;
     private EditText mEditTextUsername;
+    private Button mButtonTogglePassword;
 
     private Optional<Password> maybePassword;
     private PasswordSaveEventHandler passwordSaveEventHandler;
 
     private final DefaultPasswordGenerator passwordGenerator;
     private Map<Integer, Integer> formInputFields;
+
+    private boolean isPasswordVisible = false;
 
     {
         formInputFields = new HashMap<>();
@@ -70,6 +75,7 @@ public class AddPasswordFragment extends DialogFragment {
         mEditTextPassword = rootView.findViewById(R.id.form_txt_password);
         mEditTextWebsite = rootView.findViewById(R.id.form_txt_website);
         mEditTextUsername = rootView.findViewById(R.id.form_txt_username);
+        mButtonTogglePassword = rootView.findViewById(R.id.button_toggle_password);
 
         formInputFields.keySet().forEach(key -> {
             ImageButton button = rootView.findViewById(formInputFields.get(key));
@@ -103,6 +109,20 @@ public class AddPasswordFragment extends DialogFragment {
             }
             dismiss();
         });
+
+        mButtonTogglePassword.setOnClickListener(this::togglePasswordView);
+    }
+
+    private void togglePasswordView(View view) {
+        if (!isPasswordVisible) {
+            mEditTextPassword.setTransformationMethod(null);
+            isPasswordVisible = true;
+            mButtonTogglePassword.setText(R.string.button_toggle_pw_hidePassword);
+        } else {
+            mEditTextPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            isPasswordVisible = false;
+            mButtonTogglePassword.setText(R.string.button_toggle_pw_showPassword);
+        }
     }
 
     private void showCurrentPassword(Password password) {

@@ -14,4 +14,6 @@
     <string name="menu_import">Import</string>
     <string name="menu_deleteAll">Delete All</string>
     <string name="menu_about">About</string>
+    <string name="button_toggle_pw_hidePassword">Hide Password</string>
+    <string name="button_toggle_pw_showPassword">Show Password</string>
 </resources>

@@ -61,7 +61,7 @@ public class PasswordListAdapter extends ArrayAdapter<Password> implements DateF
         TextView username = cardView.findViewById(R.id.username);
         TextView title = cardView.findViewById(R.id.password_title);
 //        mLinearLayout = cardView.findViewById(R.id.password_action_pane);
-        mImageViewEditPasswordButton = cardView.findViewById(R.id.view_password_button);
+        mImageViewEditPasswordButton = cardView.findViewById(R.id.toggle_password_button);
 
         mButtonCopyPassword = cardView.findViewById(R.id.button_copy_password);
         mButtonCopyPassword.setOnClickListener(view -> {
