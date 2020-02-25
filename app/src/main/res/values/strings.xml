@@ -6,6 +6,7 @@
     <string name="login">Login</string>
     <string name="login_title">My Pass</string>
     <string name="add_password">Add Password</string>
+    <string name="manage_password">Manage Password</string>
     <string name="dashboard_sub_title">Manage Passwords</string>
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -16,4 +17,9 @@
     <string name="menu_about">About</string>
     <string name="button_toggle_pw_hidePassword">Hide Password</string>
     <string name="button_toggle_pw_showPassword">Show Password</string>
+
+    <string name="lorem">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Varius sit amet mattis vulputate enim. Fermentum dui faucibus in ornare quam viverra orci sagittis eu. Et malesuada fames ac turpis egestas integer eget aliquet nibh. Scelerisque viverra mauris in aliquam sem fringilla ut. Curabitur vitae nunc sed velit dignissim sodales ut eu sem. Et malesuada fames ac turpis egestas maecenas pharetra convallis posuere. Diam maecenas sed enim ut sem viverra aliquet eget. Enim sit amet venenatis urna cursus. Faucibus vitae aliquet nec ullamcorper. Et tortor consequat id porta. Iaculis nunc sed augue lacus viverra vitae congue eu consequat.
+    </string>
+    <string name="EDIT">EDIT</string>
 </resources>

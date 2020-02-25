@@ -251,7 +251,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void showAddPasswordDialog(View view) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator, Optional.empty());
+        AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator, Optional.empty(), Optional.empty());
         fragmentTransaction.add(android.R.id.content, newFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();

@@ -96,7 +96,7 @@ public class PasswordListAdapter extends ArrayAdapter<Password> implements DateF
 
     private void showEditPasswordViewScreen(Password password) {
         FragmentTransaction fragmentTransaction = this.fragmentManager.beginTransaction();
-        AddPasswordFragment newFragment = new AddPasswordFragment(this::onUpdatePassword, this.passwordGenerator, Optional.of(password));//TODO get from application DI
+        AddPasswordFragment newFragment = new AddPasswordFragment(this::onUpdatePassword, this.passwordGenerator, Optional.of(password),Optional.empty());//TODO get from application DI
         fragmentTransaction.add(android.R.id.content, newFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
