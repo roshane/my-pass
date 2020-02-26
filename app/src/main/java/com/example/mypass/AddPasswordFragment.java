@@ -52,12 +52,11 @@ public class AddPasswordFragment extends DialogFragment {
 
     public AddPasswordFragment(PasswordSaveEventHandler passwordSaveEventHandler,
                                DefaultPasswordGenerator passwordGenerator,
-                               Optional<Password> maybePassword,
-                               Optional<ViewMode> maybeViewMode) {
+                               Optional<Password> maybePassword) {
         this.passwordSaveEventHandler = passwordSaveEventHandler;
         this.passwordGenerator = passwordGenerator;
         this.maybePassword = maybePassword;
-        this.viewMode = maybeViewMode.orElse(ViewMode.READONLY);
+        this.viewMode = ViewMode.READONLY;
     }
 
     @Nullable
@@ -133,23 +132,23 @@ public class AddPasswordFragment extends DialogFragment {
     private void toggleViewMode(ViewMode viewMode) {
         if (viewMode == ViewMode.READONLY) {
             this.displayDetailView();
-            this.mButtonEditPassword.setVisibility(View.VISIBLE);
-            this.mButtonSavePassword.setVisibility(View.GONE);
         } else {
             this.displayEditView();
-            this.mButtonEditPassword.setVisibility(View.GONE);
-            this.mButtonSavePassword.setVisibility(View.VISIBLE);
         }
     }
 
     private void displayDetailView() {
         mListViewPasswordDisplayView.setVisibility(View.VISIBLE);
         mListViewPasswordEditView.setVisibility(View.GONE);
+        mButtonEditPassword.setVisibility(View.VISIBLE);
+        mButtonSavePassword.setVisibility(View.GONE);
     }
 
     private void displayEditView() {
         mListViewPasswordDisplayView.setVisibility(View.GONE);
         mListViewPasswordEditView.setVisibility(View.VISIBLE);
+        mButtonEditPassword.setVisibility(View.GONE);
+        mButtonSavePassword.setVisibility(View.VISIBLE);
     }
 
     private void togglePasswordView(View view) {

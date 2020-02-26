@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,7 +62,7 @@ public class PasswordListAdapter extends ArrayAdapter<Password> implements DateF
         TextView username = cardView.findViewById(R.id.username);
         TextView title = cardView.findViewById(R.id.password_title);
 //        mLinearLayout = cardView.findViewById(R.id.password_action_pane);
-        mImageViewEditPasswordButton = cardView.findViewById(R.id.toggle_password_button);
+        mImageViewEditPasswordButton = cardView.findViewById(R.id.show_password_detail_button);
 
         mButtonCopyPassword = cardView.findViewById(R.id.button_copy_password);
         mButtonCopyPassword.setOnClickListener(view -> {
@@ -96,7 +97,7 @@ public class PasswordListAdapter extends ArrayAdapter<Password> implements DateF
 
     private void showEditPasswordViewScreen(Password password) {
         FragmentTransaction fragmentTransaction = this.fragmentManager.beginTransaction();
-        AddPasswordFragment newFragment = new AddPasswordFragment(this::onUpdatePassword, this.passwordGenerator, Optional.of(password),Optional.empty());//TODO get from application DI
+        AddPasswordFragment newFragment = new AddPasswordFragment(this::onUpdatePassword, this.passwordGenerator, Optional.of(password));//TODO get from application DI
         fragmentTransaction.add(android.R.id.content, newFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();

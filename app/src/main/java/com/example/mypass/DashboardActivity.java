@@ -79,7 +79,7 @@ public class DashboardActivity extends AppCompatActivity {
         initializeComponents();
     }
 
-    @Override
+        @Override
     public void onActivityReenter(int resultCode, Intent data) {
         clearSearchResult();
         Log.d(LOG_TAG, "Clearing previous results");
@@ -251,7 +251,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void showAddPasswordDialog(View view) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator, Optional.empty(), Optional.empty());
+        AddPasswordFragment newFragment = new AddPasswordFragment(this::saveNewPassword, this.passwordGenerator, Optional.empty());
         fragmentTransaction.add(android.R.id.content, newFragment)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
